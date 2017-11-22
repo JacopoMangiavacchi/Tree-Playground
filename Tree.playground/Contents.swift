@@ -25,8 +25,14 @@ enum BinaryTreeBFSOrder {
 protocol BinaryTreeProtocol : BaseTreeProtocol {
     var left: Self? { get set }
     var right: Self? { get set }
-
+    
+    func isBalanced() -> Bool
     func DFS(order: BinaryTreeBFSOrder, completition: (ValueType) -> Void)
+}
+
+struct NodeLevel<T> {
+    var node: T
+    var level: Int
 }
 
 extension BinaryTreeProtocol {
@@ -67,6 +73,36 @@ extension BinaryTreeProtocol {
             
             completition(d.value)
         }
+    }
+    
+
+    func isBalanced() -> Bool {
+        var depthArray = [Int]()
+        var stack = [NodeLevel<Self>]()
+        
+        stack.append(NodeLevel(node: self, level: 0))
+        while stack.count > 0 {
+            let pop = stack.removeLast()
+            if pop.node.left == nil && pop.node.right == nil {
+                if !depthArray.contains(pop.level) {
+                    depthArray.append(pop.level)
+                    
+                    if depthArray.count > 2 || (depthArray.count == 2 && abs(depthArray[0] - depthArray[1]) > 1) {
+                        return false
+                    }
+                }
+            }
+            else {
+                if let left = pop.node.left {
+                    stack.append(NodeLevel(node: left, level: pop.level + 1))
+                }
+                if let right = pop.node.right {
+                    stack.append(NodeLevel(node: right, level: pop.level + 1))
+                }
+            }
+        }
+        
+        return true
     }
 }
 
@@ -223,6 +259,9 @@ bst.add(10)
 bst.add(9)
 bst.add(11)
 
+bst.isBalanced()
+bst.left?.isBalanced()
+bst.right?.isBalanced()
 
 print("BinarySearchTree DFS inOrder:")
 bst.DFS { print($0) }
